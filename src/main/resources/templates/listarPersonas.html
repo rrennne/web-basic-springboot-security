@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+                xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <meta charset="UTF-8">
     <title>Listado de personas</title>
@@ -13,19 +14,21 @@
             <th>ID</th>
             <th>Nombre</th>
             <th>Edad</th>
-            <th>Acciones</th>
+            <th sec:authorize="hasRole('ADMIN')">Acciones</th>
         </tr>
         <tr th:each="persona : ${personasLista}">
             <td th:text="${persona.id}"></td>
             <td th:text="${persona.nombre}"></td>
             <td th:text="${persona.edad}"></td>
-            <td>
+            <td sec:authorize="hasRole('ADMIN')">
                 <a th:href="@{/personas/editar/{id}(id=${persona.id})}">Editar</a>
                 <a th:href="@{/personas/eliminar/{id}(id=${persona.id})}">Eliminar</a>
             </td>
         </tr>
     </table>
-    <a href="/personas/nuevaPersona">Registrar nueva persona</a>
+    <div sec:authorize="hasRole('ADMIN')">
+        <a href="/personas/nuevaPersona">Registrar nueva persona</a>
+    </div>
 </div>
 
 
