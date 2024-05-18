@@ -26,6 +26,7 @@
             </td>
         </tr>
     </table>
+    <!--  Con thymeleaf configuramos nuestro html para la seguridad con los roles de usuarios  -->
     <div sec:authorize="hasRole('ADMIN')">
         <a href="/personas/nuevaPersona">Registrar nueva persona</a>
     </div>
