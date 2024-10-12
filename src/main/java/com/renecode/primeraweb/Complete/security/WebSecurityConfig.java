@@ -1,9 +1,11 @@
 package com.renecode.primeraweb.Complete.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,39 +13,28 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import javax.sql.DataSource;
+
 @Configuration
+@EnableWebSecurity // Lo activamos para trabajar de manera correcta con la seguidad de la base de datos.
 public class WebSecurityConfig {
 
     /**
-     * Regisstramos nuestro codificador en la fabrica de Spring
-     * para poder codificar la contraseñas en toda la aplicacion
-     * como en la clase InmemoryUserDetailsManager donde llamamos el método  .password
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+     * Esta clase nos indica para que la seguridad pueda trabajar con una seguridad en base de datos,
+     * <p>La autenticación sera en base a datos de la base de datos... (los usuarios en la db)
+     * */
+    @Autowired
+    private DataSource dataSource;
 
     /**
-     * Guardaremos los detalles de usuario en memoria, asi no tendremos que usar una ddbb.
-     * Tenemos definidos 2 usuarios con roles distintos USER, ADMIN.
-     * Al final creamos una nueva isntancia de {@param InMemoryUserDetailsManager} y le pasamos los dos objetos que hemos creado.
-     */
-    @Bean
-    public InMemoryUserDetailsManager userDetailsManager() {
-        UserDetails userDetails1 = User.builder()
-                .username("user7") /* Cuando hacemos las pruebas nos tocara cambiar el .username(1,2,3)*/
-                .password("$2a$10$CUMwMj9AJsdqI5mZv6.6PuumzvxCk1Hd3jnlSL2eM6q08vtO0y3FK") // Hay varios métodos para asignar las contraseñas encriptadas, usaremos este.
-                .roles("USER")
-                .build();
-
-        UserDetails userDetails2 = User.builder()
-                .username("admin5")
-                .password("$2a$10$CUMwMj9AJsdqI5mZv6.6PuumzvxCk1Hd3jnlSL2eM6q08vtO0y3FK") // Hay varios métodos para asignar las contraseñas encriptadas, usaremos este.
-                .roles("ADMIN")
-                .build();
-
-        return new InMemoryUserDetailsManager(userDetails1, userDetails2);
+     * Lo que hacemos con esta funcion es tomar los datos desde un db, usuario y contraseña y el rol.
+     * */
+    @Autowired
+    public void configAuthentication(AuthenticationManagerBuilder builder) throws Exception {
+        builder.jdbcAuthentication().passwordEncoder(new BCryptPasswordEncoder())
+                .dataSource(dataSource)
+                .usersByUsernameQuery("select username, password, enabled from users where username=?")
+                .authoritiesByUsernameQuery("select username, role from users where username=?");
     }
 
     /**

@@ -1,2 +1,20 @@
-package com.renecode.primeraweb.Complete.entities;public class User {
+package com.renecode.primeraweb.Complete.entities;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Entity
+@Table(name = "users")
+@Data
+public class User { // Esta entidad representa el usurios con los que voy trabajar.
+    @Id
+    @Column(name = "user_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String username;
+    private  String password;
+    private boolean enabled;
+    private String role;
+
 }
